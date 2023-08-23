@@ -4,6 +4,9 @@
 
 secret-key
 
+# IDEA
+.idea
+
 # User-specific stuff
 .idea/**/workspace.xml
 .idea/**/tasks.xml
