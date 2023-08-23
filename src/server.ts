@@ -49,6 +49,8 @@ if (appConfig.env === 'dev') {
     fastify.register(fastifySwaggerUi, {
         routePrefix: '/docs',
     });
+
+    fastify.log.info(`OpenAPI docs available at http://${appConfig.host}:${appConfig.port}/docs`);
 }
 
 fastify.register(fastifyGracefulExit, { timeout: 3000 });
@@ -60,11 +62,8 @@ const start = async () => {
     try {
         await fastify.listen({
             port: appConfig.port,
-            host: '127.0.0.1',
+            host: appConfig.host,
         });
-        if (appConfig.env === 'dev') {
-            fastify.log.info(`OpenAPI docs available at http://${appConfig.host}:${appConfig.port}/docs`);
-        }
     } catch (error) {
         fastify.log.error(error);
         process.exit(1);
