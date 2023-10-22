@@ -8,7 +8,7 @@ export class Logger {
 
     getLoggerOptions(): PinoLoggerOptions {
         if (this.config.env !== 'dev') {
-            return true;
+            return {};
         }
         return {
             level: 'debug',
