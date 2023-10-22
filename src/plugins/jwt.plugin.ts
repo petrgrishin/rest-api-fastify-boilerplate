@@ -3,11 +3,18 @@ import { Service } from 'fastify-decorators';
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { JwtConfig } from '../config/jwt.config';
 import buildGetJwks from 'get-jwks';
-import jwt, { TokenOrHeader } from '@fastify/jwt';
+import jwt, { JwtHeader, TokenOrHeader } from '@fastify/jwt';
 
 type JwtPayload = {
+    iss: string;
     scope: string;
 };
+
+declare module '@fastify/jwt' {
+    interface FastifyJWT {
+        payload: JwtPayload;
+    }
+}
 
 @Service()
 export class JwtPlugin implements PluginInterface {
@@ -21,11 +28,11 @@ export class JwtPlugin implements PluginInterface {
 
         fastify.register(jwt, {
             decode: { complete: true },
-            secret: async (request: never, token: TokenOrHeader) => {
+            secret: (request: FastifyRequest, tokenOrHeader: TokenOrHeader) => {
                 const {
                     header: { kid, alg },
                     payload: { iss },
-                } = token;
+                } = tokenOrHeader as { header: JwtHeader; payload: { iss: string } };
                 return jwks.getPublicKey({ kid, domain: iss, alg });
             },
             verify: {
