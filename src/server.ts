@@ -1,57 +1,23 @@
 import 'reflect-metadata';
-import createFastify from 'fastify';
+import createFastify, { FastifyInstance } from 'fastify';
 import { bootstrap, getInstanceByToken } from 'fastify-decorators';
 import fastifyGracefulExit from '@mgcrea/fastify-graceful-exit';
-import fastifySwagger from '@fastify/swagger';
-import fastifySwaggerUi from '@fastify/swagger-ui';
 import { AppConfig } from './config/app.config';
 import { MainController } from './controllers/main.controller';
+import { SwaggerPlugin } from './plugins/swagger.plugin';
+import { Logger } from './logger';
+import { JwtPlugin } from './plugins/jwt.plugin';
 
-const appConfig = getInstanceByToken<AppConfig>(AppConfig);
+const appConfig = getInstanceByToken(AppConfig);
+const logger = getInstanceByToken(Logger);
 
-let loggerOptions = {};
-if (appConfig.env === 'dev') {
-    loggerOptions = {
-        level: 'debug',
-        transport: {
-            target: '@mgcrea/pino-pretty-compact',
-            options: {
-                translateTime: 'HH:MM:ss Z',
-                ignore: 'pid,hostname',
-                colorize: true,
-            },
-        },
-    };
-}
+const swaggerPlugin = getInstanceByToken(SwaggerPlugin);
+const jwtPlugin = getInstanceByToken(JwtPlugin);
 
-const fastify = createFastify({
-    logger: loggerOptions,
+const fastify: FastifyInstance = createFastify({
+    logger: logger.getLoggerOptions(),
     disableRequestLogging: true,
 });
-
-if (appConfig.env === 'dev') {
-    fastify.register(fastifySwagger, {
-        openapi: {
-            info: {
-                title: 'Test swagger',
-                description: 'testing the fastify swagger api',
-                version: '0.1.0',
-            },
-            servers: [
-                {
-                    url: `http://${appConfig.host}:${appConfig.port}`,
-                },
-            ],
-        },
-        hideUntagged: true,
-    });
-
-    fastify.register(fastifySwaggerUi, {
-        routePrefix: '/docs',
-    });
-
-    fastify.log.info(`OpenAPI docs available at http://${appConfig.host}:${appConfig.port}/docs`);
-}
 
 fastify.register(fastifyGracefulExit, { timeout: 3000 });
 fastify.register(bootstrap, {
@@ -60,6 +26,9 @@ fastify.register(bootstrap, {
 
 const start = async () => {
     try {
+        swaggerPlugin.register(fastify);
+        jwtPlugin.register(fastify);
+
         await fastify.listen({
             port: appConfig.port,
             host: appConfig.host,
