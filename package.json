@@ -46,7 +46,6 @@
     "husky": "^7.0.2",
     "jest": "^29.7.0",
     "jest-junit": "^13.0.0",
-    "jest-openapi": "^0.14.1",
     "jose": "^4.6.1",
     "js-yaml": "^4.1.0",
     "nock": "^13.1.4",
@@ -59,6 +58,7 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "@fastify/csrf-protection": "^6.4.1",
     "@fastify/helmet": "^8.0.0",
     "@fastify/jwt": "^7.2.2",
     "@fastify/secure-session": "^4.0.0",
@@ -70,7 +70,6 @@
     "@sinclair/typebox": "^0.24.31",
     "config-decorator": "^1.1.0",
     "fastify": "^4.24.3",
-    "fastify-csrf": "^3.1.0",
     "fastify-decorators": "^3.15.1",
     "get-jwks": "^8.3.1",
     "json-schema-to-ts": "^2.9.2",
